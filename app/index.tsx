@@ -37,6 +37,12 @@ export default function HomeScreen() {
     };
   };
 
+  const isStopButtonDisabled = time === 0;
+
+  const onStopButtonPress = () => {
+    setTime(0);
+  };
+
   const timeDisplay = formatTime(time);
 
   return (
@@ -51,12 +57,21 @@ export default function HomeScreen() {
         <Text variant="displayLarge">{timeDisplay.seconds}</Text>
       </Surface>
 
-      <IconButton
-        icon={isTimerRunning ? "pause-circle" : "play-circle"}
-        size={72}
-        onPress={toggleTimer}
-        iconColor={theme.colors.primary}
-      />
+      <Surface style={styles.buttonContainer} elevation={0}>
+        <IconButton
+          icon={isTimerRunning ? "pause-circle" : "play-circle"}
+          size={72}
+          onPress={toggleTimer}
+          iconColor={theme.colors.primary}
+        />
+        <IconButton
+          icon="stop-circle"
+          size={72}
+          onPress={onStopButtonPress}
+          iconColor={theme.colors.primary}
+          disabled={isStopButtonDisabled}
+        />
+      </Surface>
     </SafeAreaView>
   );
 }
@@ -72,5 +87,11 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
+  },
+  buttonContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 16,
   },
 });
