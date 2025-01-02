@@ -47,9 +47,13 @@ export default function RootLayout() {
       theme={colorScheme === "dark" ? CombinedDarkTheme : CombinedDefaultTheme}
     >
       <SafeAreaProvider>
-        <Stack screenOptions={{ headerShown: false }}>
-          <Stack.Screen name="index" />
-        </Stack>
+        <Stack
+          initialRouteName="index"
+          screenOptions={{
+            headerShown: false,
+            animation: "fade",
+          }}
+        />
       </SafeAreaProvider>
     </PaperProvider>
   );
