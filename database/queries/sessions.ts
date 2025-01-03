@@ -24,3 +24,10 @@ export const createSession = async (
     [session.start_time, session.end_time, session.duration, session.notes]
   );
 };
+
+export const deleteSession = async (
+  db: SQLiteDatabase,
+  sessionId: number
+): Promise<SQLiteRunResult> => {
+  return db.runAsync(`DELETE FROM Sessions WHERE id = ?`, [sessionId]);
+};
