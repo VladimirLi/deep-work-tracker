@@ -1,7 +1,9 @@
+import { migrateIfNeeded } from "@/database/migration";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
+import { SQLiteProvider } from "expo-sqlite";
 import { useEffect } from "react";
 import {
   MD3DarkTheme,
@@ -43,18 +45,25 @@ export default function RootLayout() {
   }
 
   return (
-    <PaperProvider
-      theme={colorScheme === "dark" ? CombinedDarkTheme : CombinedDefaultTheme}
+    <SQLiteProvider
+      databaseName="deep-work-tracker.db"
+      onInit={migrateIfNeeded}
     >
-      <SafeAreaProvider>
-        <Stack
-          initialRouteName="index"
-          screenOptions={{
-            headerShown: false,
-            animation: "fade",
-          }}
-        />
-      </SafeAreaProvider>
-    </PaperProvider>
+      <PaperProvider
+        theme={
+          colorScheme === "dark" ? CombinedDarkTheme : CombinedDefaultTheme
+        }
+      >
+        <SafeAreaProvider>
+          <Stack
+            initialRouteName="index"
+            screenOptions={{
+              headerShown: false,
+              animation: "fade",
+            }}
+          />
+        </SafeAreaProvider>
+      </PaperProvider>
+    </SQLiteProvider>
   );
 }

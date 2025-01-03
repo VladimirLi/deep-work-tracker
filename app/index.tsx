@@ -1,12 +1,30 @@
+import { Session } from "@/database/queries/sessions";
+import { useSessions } from "@/hooks/useSessions";
 import { useEffect, useState } from "react";
 import { StyleSheet } from "react-native";
 import { IconButton, Surface, Text, useTheme } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+type OngoingSession = Pick<Session, "start_time">;
+
 export default function HomeScreen() {
+  const [ongoingSession, setOngoingSession] = useState<OngoingSession | null>(
+    null
+  );
   const [isTimerRunning, setIsTimerRunning] = useState(false);
   const [time, setTime] = useState(0);
   const theme = useTheme();
+  const { createSession, getSessions } = useSessions();
+
+  const logSessions = () => {
+    getSessions().then((sessions) => {
+      console.log(JSON.stringify(sessions, null, 2));
+    });
+  };
+
+  useEffect(() => {
+    logSessions();
+  }, []);
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
@@ -22,10 +40,6 @@ export default function HomeScreen() {
     };
   }, [isTimerRunning]);
 
-  const toggleTimer = () => {
-    setIsTimerRunning(!isTimerRunning);
-  };
-
   const formatTime = (totalSeconds: number) => {
     const hours = Math.floor(totalSeconds / 3600);
     const minutes = Math.floor((totalSeconds % 3600) / 60);
@@ -37,10 +51,45 @@ export default function HomeScreen() {
     };
   };
 
-  const isStopButtonDisabled = time === 0;
+  const startSession = () => {
+    setOngoingSession({ start_time: new Date().toISOString() });
+    setIsTimerRunning(true);
+  };
 
-  const onStopButtonPress = () => {
-    setTime(0);
+  const handlePlayButtonPress = () => {
+    if (ongoingSession === null) {
+      startSession();
+    } else {
+      setIsTimerRunning(true);
+    }
+  };
+
+  const handlePauseButtonPress = () => {
+    setIsTimerRunning(false);
+  };
+
+  const isStopButtonDisabled = ongoingSession === null;
+
+  const saveSession = () => {
+    if (ongoingSession === null) return;
+
+    const endTime = new Date().toISOString();
+
+    createSession({
+      start_time: ongoingSession.start_time,
+      end_time: endTime,
+      notes: null,
+      duration: time,
+    }).then(() => {
+      setOngoingSession(null);
+      logSessions();
+      setTime(0);
+      setIsTimerRunning(false);
+    });
+  };
+
+  const handleStopButtonPress = () => {
+    saveSession();
   };
 
   const timeDisplay = formatTime(time);
@@ -61,13 +110,15 @@ export default function HomeScreen() {
         <IconButton
           icon={isTimerRunning ? "pause-circle" : "play-circle"}
           size={72}
-          onPress={toggleTimer}
+          onPress={
+            isTimerRunning ? handlePauseButtonPress : handlePlayButtonPress
+          }
           iconColor={theme.colors.primary}
         />
         <IconButton
           icon="stop-circle"
           size={72}
-          onPress={onStopButtonPress}
+          onPress={handleStopButtonPress}
           iconColor={theme.colors.primary}
           disabled={isStopButtonDisabled}
         />
