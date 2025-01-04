@@ -28,16 +28,21 @@ const formatTime = (totalSeconds: number): FormattedTime => {
 };
 
 export const useTimer = (onStop: () => void): UseTimerReturn => {
-  const [sessionStartTimestamp, setSessionStartTimestamp] =
-    useState<Date | null>(null);
-  const [isTimerRunning, setIsTimerRunning] = useState(false);
-  const [time, setTime] = useState(0);
+  const [startTimestamp, setStartTimestamp] = useState<Date | null>(null);
+  const [pauseTimestamp, setPauseTimestamp] = useState<Date | null>(null);
+  const [pausedDuration, setPausedDuration] = useState(0);
+  const [isRunning, setIsRunning] = useState(false);
+  const [activeDuration, setActiveDuration] = useState(0);
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
-    if (isTimerRunning) {
+    if (isRunning && startTimestamp) {
       interval = setInterval(() => {
-        setTime((prevTime) => prevTime + 1);
+        const now = new Date();
+        const totalDuration = Math.floor(
+          (now.getTime() - startTimestamp.getTime()) / 1000
+        );
+        setActiveDuration(totalDuration - pausedDuration);
       }, 1000);
     }
     return () => {
@@ -45,33 +50,44 @@ export const useTimer = (onStop: () => void): UseTimerReturn => {
         clearInterval(interval);
       }
     };
-  }, [isTimerRunning]);
+  }, [isRunning, startTimestamp, pausedDuration]);
 
   const startSession = () => {
-    if (!sessionStartTimestamp) {
-      setSessionStartTimestamp(new Date());
+    if (!startTimestamp) {
+      setStartTimestamp(new Date());
+    } else if (pauseTimestamp) {
+      // Coming back from pause
+      const now = new Date();
+      const additionalPausedTime = Math.floor(
+        (now.getTime() - pauseTimestamp.getTime()) / 1000
+      );
+      setPausedDuration((prev) => prev + additionalPausedTime);
+      setPauseTimestamp(null);
     }
-    setIsTimerRunning(true);
+    setIsRunning(true);
   };
 
   const pauseSession = () => {
-    setIsTimerRunning(false);
+    setIsRunning(false);
+    setPauseTimestamp(new Date());
   };
 
   const stopSession = () => {
     onStop();
-    setSessionStartTimestamp(null);
-    setTime(0);
-    setIsTimerRunning(false);
+    setStartTimestamp(null);
+    setActiveDuration(0);
+    setIsRunning(false);
+    setPauseTimestamp(null);
+    setPausedDuration(0);
   };
 
   return {
-    formattedTime: formatTime(time),
-    sessionStartTimestamp,
-    sessionDuration: time,
+    formattedTime: formatTime(activeDuration),
+    sessionStartTimestamp: startTimestamp,
+    sessionDuration: activeDuration,
     startSession,
     pauseSession,
     stopSession,
-    isTimerRunning,
+    isTimerRunning: isRunning,
   };
 };
