@@ -1,10 +1,10 @@
 import { migrateIfNeeded } from "@/database/migration";
-import { useColorScheme } from "@/hooks/useColorScheme";
 import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { SQLiteProvider } from "expo-sqlite";
 import { useEffect } from "react";
+import { useColorScheme } from "react-native";
 import {
   MD3DarkTheme,
   MD3LightTheme,
@@ -13,20 +13,6 @@ import {
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
 SplashScreen.preventAutoHideAsync();
-
-const CombinedDefaultTheme = {
-  ...MD3LightTheme,
-  colors: {
-    ...MD3LightTheme.colors,
-  },
-};
-
-const CombinedDarkTheme = {
-  ...MD3DarkTheme,
-  colors: {
-    ...MD3DarkTheme.colors,
-  },
-};
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
@@ -50,9 +36,7 @@ export default function RootLayout() {
       onInit={migrateIfNeeded}
     >
       <PaperProvider
-        theme={
-          colorScheme === "dark" ? CombinedDarkTheme : CombinedDefaultTheme
-        }
+        theme={colorScheme === "dark" ? MD3DarkTheme : MD3LightTheme}
       >
         <SafeAreaProvider>
           <Stack
