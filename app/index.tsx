@@ -21,7 +21,6 @@ export default function HomeScreen() {
   const loadSessions = async () => {
     const sessions = await getSessions();
     setSessionCount(sessions.length);
-    console.log(JSON.stringify(sessions, null, 2));
   };
 
   useEffect(() => {

@@ -8,7 +8,6 @@ export const migrateIfNeeded = async (db: SQLiteDatabase) => {
   );
   let currentDbVersion = result?.user_version ?? 0;
 
-  console.log("currentDbVersion", currentDbVersion);
   if (currentDbVersion === 0) {
     await migrateFrom0To1(db);
   }
