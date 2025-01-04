@@ -1,6 +1,6 @@
 import { SessionList } from "@/components/SessionList";
-import { Session } from "@/database/queries/sessions";
 import { useSessions } from "@/hooks/useSessions";
+import { useTimer } from "@/hooks/useTimer";
 import { useEffect, useState } from "react";
 import { StyleSheet, View } from "react-native";
 import {
@@ -12,14 +12,7 @@ import {
 } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-type OngoingSession = Pick<Session, "start_time">;
-
 export default function HomeScreen() {
-  const [ongoingSession, setOngoingSession] = useState<OngoingSession | null>(
-    null
-  );
-  const [isTimerRunning, setIsTimerRunning] = useState(false);
-  const [time, setTime] = useState(0);
   const [showSessions, setShowSessions] = useState(false);
   const [sessionCount, setSessionCount] = useState(0);
   const theme = useTheme();
@@ -35,73 +28,28 @@ export default function HomeScreen() {
     loadSessions();
   }, []);
 
-  useEffect(() => {
-    let interval: NodeJS.Timeout;
-    if (isTimerRunning) {
-      interval = setInterval(() => {
-        setTime((prevTime) => prevTime + 1);
-      }, 1000);
-    }
-    return () => {
-      if (interval) {
-        clearInterval(interval);
-      }
-    };
-  }, [isTimerRunning]);
-
-  const formatTime = (totalSeconds: number) => {
-    const hours = Math.floor(totalSeconds / 3600);
-    const minutes = Math.floor((totalSeconds % 3600) / 60);
-    const seconds = totalSeconds % 60;
-    return {
-      hours: hours.toString().padStart(2, "0"),
-      minutes: minutes.toString().padStart(2, "0"),
-      seconds: seconds.toString().padStart(2, "0"),
-    };
-  };
-
-  const startSession = () => {
-    setOngoingSession({ start_time: new Date().toISOString() });
-    setIsTimerRunning(true);
-  };
-
-  const handlePlayButtonPress = () => {
-    if (ongoingSession === null) {
-      startSession();
-    } else {
-      setIsTimerRunning(true);
-    }
-  };
-
-  const handlePauseButtonPress = () => {
-    setIsTimerRunning(false);
-  };
-
-  const isStopButtonDisabled = ongoingSession === null;
-
-  const saveSession = () => {
-    if (ongoingSession === null) return;
-
-    const endTime = new Date().toISOString();
+  const handleStop = () => {
+    if (!sessionStartTimestamp) return;
 
     createSession({
-      start_time: ongoingSession.start_time,
-      end_time: endTime,
+      start_time: sessionStartTimestamp.toISOString(),
+      end_time: new Date().toISOString(),
       notes: null,
-      duration: time,
+      duration: sessionDuration,
     }).then(() => {
-      setOngoingSession(null);
       loadSessions();
-      setTime(0);
-      setIsTimerRunning(false);
     });
   };
 
-  const handleStopButtonPress = () => {
-    saveSession();
-  };
-
-  const timeDisplay = formatTime(time);
+  const {
+    formattedTime,
+    sessionStartTimestamp,
+    sessionDuration,
+    startSession,
+    pauseSession,
+    stopSession,
+    isTimerRunning,
+  } = useTimer(handleStop);
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: theme.colors.background }}>
@@ -113,28 +61,26 @@ export default function HomeScreen() {
           ]}
         >
           <Surface style={styles.timeDisplay} elevation={0}>
-            <Text variant="displayLarge">{timeDisplay.hours}</Text>
+            <Text variant="displayLarge">{formattedTime.hours}</Text>
             <Text variant="displayLarge">:</Text>
-            <Text variant="displayLarge">{timeDisplay.minutes}</Text>
+            <Text variant="displayLarge">{formattedTime.minutes}</Text>
             <Text variant="displayLarge">:</Text>
-            <Text variant="displayLarge">{timeDisplay.seconds}</Text>
+            <Text variant="displayLarge">{formattedTime.seconds}</Text>
           </Surface>
 
           <Surface style={styles.buttonContainer} elevation={0}>
             <IconButton
               icon={isTimerRunning ? "pause-circle" : "play-circle"}
               size={72}
-              onPress={
-                isTimerRunning ? handlePauseButtonPress : handlePlayButtonPress
-              }
+              onPress={isTimerRunning ? pauseSession : startSession}
               iconColor={theme.colors.primary}
             />
             <IconButton
               icon="stop-circle"
               size={72}
-              onPress={handleStopButtonPress}
+              onPress={stopSession}
               iconColor={theme.colors.primary}
-              disabled={isStopButtonDisabled}
+              disabled={!sessionStartTimestamp}
             />
           </Surface>
         </View>
