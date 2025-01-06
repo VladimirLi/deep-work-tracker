@@ -63,28 +63,19 @@ const SwipeableActivityItem: React.FC<SwipeableActivityItemProps> = ({
     progress: Animated.AnimatedInterpolation<number>,
     dragX: Animated.AnimatedInterpolation<number>
   ) => {
-    const scale = dragX.interpolate({
-      inputRange: [-100, 0],
-      outputRange: [1, 0],
-      extrapolate: "clamp",
-    });
-
     return (
       <View
         style={[
           styles.swipeActions,
+          styles.rightAction,
           { backgroundColor: theme.colors.errorContainer },
         ]}
       >
-        <Animated.View style={{ transform: [{ scale }] }}>
-          <IconButton
-            icon="delete"
-            mode="contained"
-            containerColor="transparent"
-            iconColor={theme.colors.onErrorContainer}
-            size={24}
-          />
-        </Animated.View>
+        <IconButton
+          icon="delete"
+          size={24}
+          iconColor={theme.colors.onErrorContainer}
+        />
       </View>
     );
   };
@@ -93,9 +84,9 @@ const SwipeableActivityItem: React.FC<SwipeableActivityItemProps> = ({
     progress: Animated.AnimatedInterpolation<number>,
     dragX: Animated.AnimatedInterpolation<number>
   ) => {
-    const scale = dragX.interpolate({
-      inputRange: [0, 100],
-      outputRange: [0, 1],
+    const trans = dragX.interpolate({
+      inputRange: [0, 50],
+      outputRange: [0, 50],
       extrapolate: "clamp",
     });
 
@@ -103,18 +94,15 @@ const SwipeableActivityItem: React.FC<SwipeableActivityItemProps> = ({
       <View
         style={[
           styles.swipeActions,
+          styles.leftAction,
           { backgroundColor: theme.colors.primaryContainer },
         ]}
       >
-        <Animated.View style={{ transform: [{ scale }] }}>
-          <IconButton
-            icon="pencil"
-            mode="contained"
-            containerColor="transparent"
-            iconColor={theme.colors.onPrimaryContainer}
-            size={24}
-          />
-        </Animated.View>
+        <IconButton
+          icon="pencil"
+          size={24}
+          iconColor={theme.colors.onPrimaryContainer}
+        />
       </View>
     );
   };
@@ -124,9 +112,9 @@ const SwipeableActivityItem: React.FC<SwipeableActivityItemProps> = ({
       ref={swipeableRef}
       renderRightActions={renderRightActions}
       renderLeftActions={renderLeftActions}
-      friction={1.5}
-      leftThreshold={40}
-      rightThreshold={40}
+      friction={2}
+      leftThreshold={30}
+      rightThreshold={30}
       overshootLeft={false}
       overshootRight={false}
       onSwipeableWillOpen={handleSwipeableWillOpen}
@@ -351,7 +339,7 @@ const styles = StyleSheet.create({
   },
   activityItem: {
     borderRadius: 8,
-    marginVertical: 4,
+    height: 48,
   },
   activityText: {
     fontSize: 16,
@@ -397,8 +385,15 @@ const styles = StyleSheet.create({
   swipeActions: {
     flex: 1,
     justifyContent: "center",
-    alignItems: "center",
     width: 75,
+    height: 48,
+    borderRadius: 8,
+  },
+  leftAction: {
+    alignItems: "flex-start",
+  },
+  rightAction: {
+    alignItems: "flex-end",
   },
   gestureRoot: {
     marginBottom: 15,
