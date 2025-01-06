@@ -1,21 +1,15 @@
 import { useSQLiteContext } from "expo-sqlite";
 import React, { useState } from "react";
-import { Animated, FlatList, Modal, StyleSheet, View } from "react-native";
-import {
-  GestureHandlerRootView,
-  Swipeable,
-} from "react-native-gesture-handler";
+import { FlatList, Modal, View } from "react-native";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 import {
   Button,
   Card,
   Divider,
-  IconButton,
-  List,
   Portal,
   Surface,
   Text,
   TextInput,
-  useTheme,
 } from "react-native-paper";
 import {
   Activity,
@@ -24,162 +18,10 @@ import {
   getActivities,
   updateActivity,
 } from "../database/queries/activities";
-
-type ActivityManagerProps = {
-  visible: boolean;
-  onDismiss: () => void;
-  selectedActivityId: number;
-  onSelectActivity: (activityId: number) => void;
-};
-
-type SwipeableActivityItemProps = {
-  item: Activity;
-  selectedActivityId: number;
-  onSelect: (id: number) => void;
-  onEdit: (activity: Activity) => void;
-  onDelete: (id: number) => void;
-};
-
-const SwipeableActivityItem: React.FC<SwipeableActivityItemProps> = ({
-  item,
-  selectedActivityId,
-  onSelect,
-  onEdit,
-  onDelete,
-}) => {
-  const theme = useTheme();
-  const swipeableRef = React.useRef<Swipeable>(null);
-
-  const handleSwipeableWillOpen = (direction: "left" | "right") => {
-    if (direction === "left") {
-      onEdit(item);
-    } else {
-      onDelete(item.id);
-    }
-    swipeableRef.current?.close();
-  };
-
-  const renderRightActions = (
-    progress: Animated.AnimatedInterpolation<number>,
-    dragX: Animated.AnimatedInterpolation<number>
-  ) => {
-    return (
-      <View
-        style={[
-          styles.swipeActions,
-          styles.rightAction,
-          { backgroundColor: theme.colors.errorContainer },
-        ]}
-      >
-        <IconButton
-          icon="delete"
-          size={24}
-          iconColor={theme.colors.onErrorContainer}
-        />
-      </View>
-    );
-  };
-
-  const renderLeftActions = (
-    progress: Animated.AnimatedInterpolation<number>,
-    dragX: Animated.AnimatedInterpolation<number>
-  ) => {
-    const trans = dragX.interpolate({
-      inputRange: [0, 50],
-      outputRange: [0, 50],
-      extrapolate: "clamp",
-    });
-
-    return (
-      <View
-        style={[
-          styles.swipeActions,
-          styles.leftAction,
-          { backgroundColor: theme.colors.primaryContainer },
-        ]}
-      >
-        <IconButton
-          icon="pencil"
-          size={24}
-          iconColor={theme.colors.onPrimaryContainer}
-        />
-      </View>
-    );
-  };
-
-  return (
-    <Swipeable
-      ref={swipeableRef}
-      renderRightActions={renderRightActions}
-      renderLeftActions={renderLeftActions}
-      friction={2}
-      leftThreshold={30}
-      rightThreshold={30}
-      overshootLeft={false}
-      overshootRight={false}
-      onSwipeableWillOpen={handleSwipeableWillOpen}
-      useNativeAnimations
-    >
-      <List.Item
-        title={item.name}
-        style={[
-          styles.activityItem,
-          { backgroundColor: theme.colors.background },
-          item.id === selectedActivityId && {
-            backgroundColor: theme.colors.primaryContainer,
-          },
-        ]}
-        titleStyle={[
-          styles.activityText,
-          item.id === selectedActivityId && {
-            color: theme.colors.onPrimaryContainer,
-          },
-        ]}
-        onPress={() => onSelect(item.id)}
-      />
-    </Swipeable>
-  );
-};
-
-type EditableActivityItemProps = {
-  activity: Activity;
-  onSave: (activity: Activity) => void;
-  onCancel: () => void;
-};
-
-const EditableActivityItem: React.FC<EditableActivityItemProps> = ({
-  activity,
-  onSave,
-  onCancel,
-}) => {
-  const [name, setName] = useState(activity.name);
-
-  return (
-    <View style={styles.editContainer}>
-      <TextInput
-        mode="outlined"
-        value={name}
-        onChangeText={setName}
-        style={styles.editInput}
-        autoFocus
-        onSubmitEditing={() => onSave({ ...activity, name })}
-        returnKeyType="done"
-      />
-      <IconButton
-        icon="check"
-        mode="contained-tonal"
-        onPress={() => onSave({ ...activity, name })}
-        style={styles.editButton}
-      />
-      <IconButton
-        icon="close"
-        mode="contained-tonal"
-        onPress={onCancel}
-        style={styles.editButton}
-      />
-    </View>
-  );
-};
+import { ActivityManagerProps } from "../types/activity";
+import { EditableActivityItem } from "./EditableActivityItem";
+import { SwipeableActivityItem } from "./SwipeableActivityItem";
+import { styles } from "./styles/ActivityManager.styles";
 
 export const ActivityManager: React.FC<ActivityManagerProps> = ({
   visible,
@@ -187,7 +29,6 @@ export const ActivityManager: React.FC<ActivityManagerProps> = ({
   selectedActivityId,
   onSelectActivity,
 }) => {
-  const theme = useTheme();
   const [activities, setActivities] = useState<Activity[]>([]);
   const [newActivityName, setNewActivityName] = useState("");
   const [editingActivity, setEditingActivity] = useState<Activity | null>(null);
@@ -314,91 +155,3 @@ export const ActivityManager: React.FC<ActivityManagerProps> = ({
     </Portal>
   );
 };
-
-const styles = StyleSheet.create({
-  centeredView: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-    padding: 16,
-  },
-  modalView: {
-    width: "90%",
-    maxHeight: "80%",
-    borderRadius: 16,
-  },
-  modalTitle: {
-    marginBottom: 20,
-    textAlign: "center",
-    fontWeight: "bold",
-  },
-  sectionTitle: {
-    marginVertical: 10,
-    opacity: 0.7,
-  },
-  activityItem: {
-    borderRadius: 8,
-    height: 48,
-  },
-  activityText: {
-    fontSize: 16,
-  },
-  closeButton: {
-    marginTop: 15,
-  },
-  addActivityContainer: {
-    marginVertical: 15,
-    minHeight: 60,
-  },
-  input: {
-    backgroundColor: "transparent",
-  },
-  activityRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginVertical: 4,
-  },
-  editContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    flex: 1,
-    gap: 4,
-  },
-  editInput: {
-    flex: 1,
-  },
-  editButton: {
-    margin: 0,
-  },
-  divider: {
-    marginVertical: 15,
-  },
-  separator: {
-    height: 8,
-  },
-  list: {
-    maxHeight: 300,
-    minHeight: 100,
-  },
-  swipeActions: {
-    flex: 1,
-    justifyContent: "center",
-    width: 75,
-    height: 48,
-    borderRadius: 8,
-  },
-  leftAction: {
-    alignItems: "flex-start",
-  },
-  rightAction: {
-    alignItems: "flex-end",
-  },
-  gestureRoot: {
-    marginBottom: 15,
-  },
-  listContent: {
-    flexGrow: 0,
-  },
-});
