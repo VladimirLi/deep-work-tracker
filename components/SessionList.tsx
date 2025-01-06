@@ -1,9 +1,11 @@
 import { Session } from "@/database/queries/sessions";
+import { useActivities } from "@/hooks/useActivities";
 import { useSessions } from "@/hooks/useSessions";
 import { format } from "date-fns";
 import React from "react";
 import { Alert, FlatList, StyleSheet, View } from "react-native";
 import { Button, Card, IconButton, Text, useTheme } from "react-native-paper";
+import { ActivityPicker } from "./ActivityPicker";
 
 interface SessionListProps {
   onClose: () => void;
@@ -15,6 +17,7 @@ export const SessionList = ({
   onSessionsChange,
 }: SessionListProps) => {
   const { getSessions, deleteSession } = useSessions();
+  const { updateSessionActivity } = useActivities();
   const [sessions, setSessions] = React.useState<Session[]>([]);
   const theme = useTheme();
 
@@ -46,6 +49,14 @@ export const SessionList = ({
     );
   };
 
+  const handleActivityChange = async (
+    sessionId: number,
+    activityId: number
+  ) => {
+    await updateSessionActivity(sessionId, activityId);
+    await loadSessions();
+  };
+
   const renderItem = React.useCallback(
     ({ item }: { item: Session }) => (
       <Card style={styles.sessionItem} mode="elevated">
@@ -62,6 +73,12 @@ export const SessionList = ({
                 Notes: {item.notes}
               </Text>
             )}
+            <ActivityPicker
+              selectedActivityId={item.activity_id}
+              onSelectActivity={(activityId) =>
+                handleActivityChange(item.id, activityId)
+              }
+            />
           </View>
           <Button
             mode="contained-tonal"
@@ -127,7 +144,7 @@ const styles = StyleSheet.create({
   cardContent: {
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: "center",
+    alignItems: "flex-start",
   },
   sessionInfo: {
     flex: 1,
@@ -142,6 +159,7 @@ const styles = StyleSheet.create({
   },
   notesText: {
     opacity: 0.7,
+    marginBottom: 8,
   },
   deleteButton: {
     minWidth: 80,
