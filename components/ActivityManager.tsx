@@ -28,6 +28,7 @@ export const ActivityManager: React.FC<ActivityManagerProps> = ({
   onDismiss,
   selectedActivityId,
   onSelectActivity,
+  onActivitiesChange,
 }) => {
   const [activities, setActivities] = useState<Activity[]>([]);
   const [newActivityName, setNewActivityName] = useState("");
@@ -43,6 +44,7 @@ export const ActivityManager: React.FC<ActivityManagerProps> = ({
   const loadActivities = async () => {
     const loadedActivities = await getActivities(db);
     setActivities(loadedActivities);
+    onActivitiesChange(loadedActivities);
   };
 
   const handleAddActivity = async () => {

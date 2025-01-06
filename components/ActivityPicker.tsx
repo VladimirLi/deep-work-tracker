@@ -40,6 +40,7 @@ export const ActivityPicker: React.FC<ActivityPickerProps> = ({
         onDismiss={() => setModalVisible(false)}
         selectedActivityId={selectedActivityId}
         onSelectActivity={onSelectActivity}
+        onActivitiesChange={setActivities}
       />
     </View>
   );

@@ -1,7 +1,7 @@
 import React from "react";
-import { Animated, View } from "react-native";
+import { Animated, Pressable, View } from "react-native";
 import { Swipeable } from "react-native-gesture-handler";
-import { IconButton, List, useTheme } from "react-native-paper";
+import { IconButton, Text, useTheme } from "react-native-paper";
 import { SwipeableActivityItemProps } from "../types/activity";
 import { styles } from "./styles/ActivityManager.styles";
 
@@ -72,6 +72,21 @@ export const SwipeableActivityItem: React.FC<SwipeableActivityItemProps> = ({
     );
   };
 
+  const formatDuration = (seconds: number) => {
+    const minutes = Math.round(seconds / 60);
+    if (minutes < 60) {
+      return `${minutes}m`;
+    }
+    const hours = Math.floor(minutes / 60);
+    const remainingMinutes = minutes % 60;
+    return remainingMinutes > 0
+      ? `${hours}h ${remainingMinutes}m`
+      : `${hours}h`;
+  };
+
+  const isSelected = item.id === selectedActivityId;
+  const textColor = isSelected ? theme.colors.onPrimaryContainer : undefined;
+
   return (
     <Swipeable
       ref={swipeableRef}
@@ -85,23 +100,44 @@ export const SwipeableActivityItem: React.FC<SwipeableActivityItemProps> = ({
       onSwipeableWillOpen={handleSwipeableWillOpen}
       useNativeAnimations
     >
-      <List.Item
-        title={item.name}
-        style={[
-          styles.activityItem,
-          { backgroundColor: theme.colors.background },
-          item.id === selectedActivityId && {
-            backgroundColor: theme.colors.primaryContainer,
-          },
-        ]}
-        titleStyle={[
-          styles.activityText,
-          item.id === selectedActivityId && {
-            color: theme.colors.onPrimaryContainer,
-          },
-        ]}
-        onPress={() => onSelect(item.id)}
-      />
+      <Pressable onPress={() => onSelect(item.id)}>
+        <View
+          style={[
+            styles.activityItem,
+            { backgroundColor: theme.colors.background },
+            isSelected && {
+              backgroundColor: theme.colors.primaryContainer,
+            },
+          ]}
+        >
+          <View style={styles.activityContent}>
+            <Text
+              variant="bodyLarge"
+              style={[
+                styles.activityText,
+                isSelected && {
+                  color: textColor,
+                },
+              ]}
+            >
+              {item.name}
+            </Text>
+            {item.totalDuration ? (
+              <Text
+                variant="bodyMedium"
+                style={[
+                  styles.durationText,
+                  isSelected && {
+                    color: textColor,
+                  },
+                ]}
+              >
+                {formatDuration(item.totalDuration)}
+              </Text>
+            ) : null}
+          </View>
+        </View>
+      </Pressable>
     </Swipeable>
   );
 };

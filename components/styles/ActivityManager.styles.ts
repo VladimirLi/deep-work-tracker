@@ -25,9 +25,29 @@ export const styles = StyleSheet.create({
   activityItem: {
     borderRadius: 8,
     height: 48,
+    justifyContent: "center",
+  },
+  activityContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 16,
   },
   activityText: {
     fontSize: 16,
+    flex: 1,
+  },
+  durationContainer: {
+    height: 48,
+    justifyContent: "center",
+    paddingRight: 16,
+  },
+  durationText: {
+    fontSize: 14,
+    opacity: 0.7,
+    width: 70,
+    textAlign: "right",
+    marginLeft: 8,
   },
   closeButton: {
     marginTop: 15,

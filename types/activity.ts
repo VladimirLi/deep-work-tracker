@@ -5,6 +5,7 @@ export interface ActivityManagerProps {
   onDismiss: () => void;
   selectedActivityId: number;
   onSelectActivity: (activityId: number) => void;
+  onActivitiesChange: (activities: Activity[]) => void;
 }
 
 export interface SwipeableActivityItemProps {

@@ -3,12 +3,20 @@ import { SQLiteDatabase, SQLiteRunResult } from "expo-sqlite";
 export type Activity = {
   id: number;
   name: string;
+  totalDuration?: number;
 };
 
 export const getActivities = async (
   db: SQLiteDatabase
 ): Promise<Activity[]> => {
-  return db.getAllAsync<Activity>("SELECT * FROM Activities");
+  return db.getAllAsync<Activity>(
+    `SELECT 
+      Activities.*, 
+      COALESCE(SUM(Sessions.duration), 0) as totalDuration
+    FROM Activities 
+    LEFT JOIN Sessions ON Activities.id = Sessions.activity_id
+    GROUP BY Activities.id`
+  );
 };
 
 export const createActivity = async (
