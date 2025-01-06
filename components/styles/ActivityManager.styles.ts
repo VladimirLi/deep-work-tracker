@@ -18,6 +18,12 @@ export const styles = StyleSheet.create({
     textAlign: "center",
     fontWeight: "bold",
   },
+  swipeHint: {
+    textAlign: "center",
+    opacity: 0.6,
+    fontSize: 14,
+    marginBottom: 12,
+  },
   sectionTitle: {
     marginVertical: 10,
     opacity: 0.7,

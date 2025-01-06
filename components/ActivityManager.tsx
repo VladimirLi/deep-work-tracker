@@ -100,7 +100,6 @@ export const ActivityManager: React.FC<ActivityManagerProps> = ({
               <Text variant="headlineSmall" style={styles.modalTitle}>
                 Manage Activities
               </Text>
-
               <View style={styles.addActivityContainer}>
                 <TextInput
                   mode="outlined"
@@ -124,6 +123,9 @@ export const ActivityManager: React.FC<ActivityManagerProps> = ({
 
               <Text variant="titleMedium" style={styles.sectionTitle}>
                 Your Activities
+              </Text>
+              <Text style={styles.swipeHint}>
+                Swipe left to delete or right to edit
               </Text>
 
               <GestureHandlerRootView style={styles.gestureRoot}>

@@ -60,14 +60,10 @@ export const SwipeableActivityItem: React.FC<SwipeableActivityItemProps> = ({
         style={[
           styles.swipeActions,
           styles.leftAction,
-          { backgroundColor: theme.colors.primaryContainer },
+          { backgroundColor: "#E3F2FD" },
         ]}
       >
-        <IconButton
-          icon="pencil"
-          size={24}
-          iconColor={theme.colors.onPrimaryContainer}
-        />
+        <IconButton icon="pencil" size={24} iconColor="#1976D2" />
       </View>
     );
   };
