@@ -1,9 +1,11 @@
 import { Session } from "@/database/queries/sessions";
+import { useActivities } from "@/hooks/useActivities";
 import { useSessions } from "@/hooks/useSessions";
 import { format } from "date-fns";
 import React from "react";
 import { Alert, FlatList, StyleSheet, View } from "react-native";
-import { Button, Card, IconButton, Text, useTheme } from "react-native-paper";
+import { IconButton, Text, useTheme } from "react-native-paper";
+import { ActivityPicker } from "./ActivityPicker";
 
 interface SessionListProps {
   onClose: () => void;
@@ -15,6 +17,7 @@ export const SessionList = ({
   onSessionsChange,
 }: SessionListProps) => {
   const { getSessions, deleteSession } = useSessions();
+  const { updateSessionActivity } = useActivities();
   const [sessions, setSessions] = React.useState<Session[]>([]);
   const theme = useTheme();
 
@@ -46,35 +49,57 @@ export const SessionList = ({
     );
   };
 
+  const handleActivityChange = async (
+    sessionId: number,
+    activityId: number
+  ) => {
+    await updateSessionActivity(sessionId, activityId);
+    await loadSessions();
+  };
+
   const renderItem = React.useCallback(
     ({ item }: { item: Session }) => (
-      <Card style={styles.sessionItem} mode="elevated">
-        <Card.Content style={styles.cardContent}>
-          <View style={styles.sessionInfo}>
-            <Text variant="titleMedium" style={styles.dateText}>
-              {format(new Date(item.start_time), "MMM d, yyyy h:mm a")}
+      <View
+        style={[
+          styles.sessionItem,
+          { backgroundColor: theme.colors.elevation.level1 },
+        ]}
+      >
+        <View style={styles.mainContent}>
+          <View style={styles.timeInfo}>
+            <Text variant="titleMedium">
+              {format(new Date(item.start_time), "MMM d, yyyy")}
             </Text>
-            <Text variant="bodyMedium" style={styles.durationText}>
-              Duration: {Math.round(item.duration / 60)} minutes
+            <Text variant="bodyMedium" style={styles.secondaryText}>
+              {format(new Date(item.start_time), "h:mm a")} •{" "}
+              {Math.round(item.duration / 60)} min
             </Text>
-            {item.notes && (
-              <Text variant="bodyMedium" style={styles.notesText}>
-                Notes: {item.notes}
-              </Text>
-            )}
           </View>
-          <Button
+          <IconButton
+            icon="delete-outline"
             mode="contained-tonal"
             onPress={() => handleDelete(item.id)}
-            textColor={theme.colors.error}
+            iconColor={theme.colors.error}
             style={styles.deleteButton}
+          />
+        </View>
+        {item.notes && (
+          <Text
+            variant="bodyMedium"
+            style={[styles.secondaryText, styles.notes]}
           >
-            Delete
-          </Button>
-        </Card.Content>
-      </Card>
+            {item.notes}
+          </Text>
+        )}
+        <ActivityPicker
+          selectedActivityId={item.activity_id}
+          onSelectActivity={(activityId) =>
+            handleActivityChange(item.id, activityId)
+          }
+        />
+      </View>
     ),
-    [theme.colors.error]
+    [theme.colors.error, theme.colors.elevation.level1]
   );
 
   const ListHeaderComponent = React.useCallback(
@@ -122,28 +147,27 @@ const styles = StyleSheet.create({
     paddingTop: 0,
   },
   sessionItem: {
+    padding: 16,
     marginBottom: 12,
+    borderRadius: 12,
+    gap: 12,
   },
-  cardContent: {
+  mainContent: {
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: "center",
+    alignItems: "flex-start",
   },
-  sessionInfo: {
+  timeInfo: {
     flex: 1,
-    marginRight: 16,
+    gap: 4,
   },
-  dateText: {
-    marginBottom: 4,
-  },
-  durationText: {
-    marginBottom: 2,
+  secondaryText: {
     opacity: 0.7,
   },
-  notesText: {
-    opacity: 0.7,
+  notes: {
+    marginTop: -4,
   },
   deleteButton: {
-    minWidth: 80,
+    margin: -8,
   },
 });

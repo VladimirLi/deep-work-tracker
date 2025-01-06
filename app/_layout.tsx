@@ -5,6 +5,7 @@ import * as SplashScreen from "expo-splash-screen";
 import { SQLiteProvider } from "expo-sqlite";
 import { useEffect } from "react";
 import { useColorScheme } from "react-native";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 import {
   MD3DarkTheme,
   MD3LightTheme,
@@ -31,23 +32,25 @@ export default function RootLayout() {
   }
 
   return (
-    <SQLiteProvider
-      databaseName="deep-work-tracker.db"
-      onInit={migrateIfNeeded}
-    >
-      <PaperProvider
-        theme={colorScheme === "dark" ? MD3DarkTheme : MD3LightTheme}
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <SQLiteProvider
+        databaseName="deep-work-tracker.db"
+        onInit={migrateIfNeeded}
       >
-        <SafeAreaProvider>
-          <Stack
-            initialRouteName="index"
-            screenOptions={{
-              headerShown: false,
-              animation: "fade",
-            }}
-          />
-        </SafeAreaProvider>
-      </PaperProvider>
-    </SQLiteProvider>
+        <PaperProvider
+          theme={colorScheme === "dark" ? MD3DarkTheme : MD3LightTheme}
+        >
+          <SafeAreaProvider>
+            <Stack
+              initialRouteName="index"
+              screenOptions={{
+                headerShown: false,
+                animation: "fade",
+              }}
+            />
+          </SafeAreaProvider>
+        </PaperProvider>
+      </SQLiteProvider>
+    </GestureHandlerRootView>
   );
 }

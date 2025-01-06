@@ -1,4 +1,6 @@
+import { ActivityPicker } from "@/components/ActivityPicker";
 import { SessionList } from "@/components/SessionList";
+import { useActivities } from "@/hooks/useActivities";
 import { useSessions } from "@/hooks/useSessions";
 import { useTimer } from "@/hooks/useTimer";
 import { useEffect, useState } from "react";
@@ -15,8 +17,12 @@ import { SafeAreaView } from "react-native-safe-area-context";
 export default function HomeScreen() {
   const [showSessions, setShowSessions] = useState(false);
   const [sessionCount, setSessionCount] = useState(0);
+  const [selectedActivityId, setSelectedActivityId] = useState<number | null>(
+    null
+  );
   const theme = useTheme();
   const { createSession, getSessions } = useSessions();
+  const { getActivities } = useActivities();
 
   const loadSessions = async () => {
     const sessions = await getSessions();
@@ -25,16 +31,23 @@ export default function HomeScreen() {
 
   useEffect(() => {
     loadSessions();
+    // Set default activity when component mounts
+    getActivities().then((activities) => {
+      if (activities.length > 0) {
+        setSelectedActivityId(activities[0].id);
+      }
+    });
   }, []);
 
   const handleStop = () => {
-    if (!sessionStartTimestamp) return;
+    if (!sessionStartTimestamp || !selectedActivityId) return;
 
     createSession({
       start_time: sessionStartTimestamp.toISOString(),
       end_time: new Date().toISOString(),
       notes: null,
       duration: sessionDuration,
+      activity_id: selectedActivityId,
     }).then(() => {
       loadSessions();
     });
@@ -66,6 +79,11 @@ export default function HomeScreen() {
             <Text variant="displayLarge">:</Text>
             <Text variant="displayLarge">{formattedTime.seconds}</Text>
           </Surface>
+
+          <ActivityPicker
+            selectedActivityId={selectedActivityId ?? 0}
+            onSelectActivity={setSelectedActivityId}
+          />
 
           <Surface style={styles.buttonContainer} elevation={0}>
             <IconButton
