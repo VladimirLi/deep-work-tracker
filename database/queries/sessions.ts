@@ -15,7 +15,8 @@ export const getSessions = async (
   return db.getAllAsync<Session & { activity_name: string }>(
     `SELECT Sessions.*, Activities.name as activity_name 
      FROM Sessions 
-     LEFT JOIN Activities ON Sessions.activity_id = Activities.id`
+     LEFT JOIN Activities ON Sessions.activity_id = Activities.id
+     ORDER BY Sessions.start_time DESC`
   );
 };
 
