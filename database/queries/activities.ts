@@ -28,3 +28,18 @@ export const updateSessionActivity = async (
     sessionId,
   ]);
 };
+
+export const updateActivity = async (
+  db: SQLiteDatabase,
+  id: number,
+  name: string
+): Promise<SQLiteRunResult> => {
+  return db.runAsync(`UPDATE Activities SET name = ? WHERE id = ?`, [name, id]);
+};
+
+export const deleteActivity = async (
+  db: SQLiteDatabase,
+  id: number
+): Promise<SQLiteRunResult> => {
+  return db.runAsync(`DELETE FROM Activities WHERE id = ?`, [id]);
+};
